@@ -574,6 +574,11 @@ h3 {
 .contact-panel a {
   color: var(--leaf-dark);
   font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.contact-card a {
+  display: block;
 }
 
 .quote-form {
