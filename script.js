@@ -49,6 +49,17 @@ if (form) {
   const summary = document.querySelector("#quote-summary");
   const status = document.querySelector("#quote-status");
   const emailLink = document.querySelector("#email-request");
+  const sendButton = document.querySelector("#send-request");
+  const editButton = document.querySelector("#edit-request");
+  const recipients = [
+    "craig@agroexpress.farm",
+    "sales@agroexpress.farm",
+    "steven@agroexpress.farm",
+  ];
+  const recipientList = recipients.join(", ");
+  let submitting = false;
+  let submitted = false;
+  document.querySelector("#request-button-label").textContent = "Review Request";
   form.addEventListener("submit", (event) => {
     event.preventDefault();
     if (!form.reportValidity()) return;
@@ -81,7 +92,7 @@ if (form) {
     const body = lines.join("\n");
     summary.textContent = body;
     emailLink.href =
-      "mailto:sales@agroexpress.farm?subject=" +
+      "mailto:" + recipients.join(",") + "?subject=" +
       encodeURIComponent("Quote request: " + product) +
       "&body=" +
       encodeURIComponent(body);
@@ -96,7 +107,44 @@ if (form) {
       block: "start",
     });
   });
-  document.querySelector("#edit-request").addEventListener("click", () => {
+  sendButton.addEventListener("click", async () => {
+    if (submitting || submitted) return;
+    submitting = true;
+    sendButton.disabled = true;
+    editButton.disabled = true;
+    emailLink.hidden = true;
+    review.setAttribute("aria-busy", "true");
+    sendButton.querySelector("span").textContent = "Sending...";
+    status.textContent = "";
+    try {
+      const response = await fetch("/", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams(new FormData(form)).toString(),
+        signal: AbortSignal.timeout(20000),
+      });
+      if (!response.ok) throw new Error("Quote submission failed");
+      submitted = true;
+      document.querySelector("#review-title").textContent = "Request received";
+      status.textContent =
+        "Thank you. Our team will follow up at the email address you provided.";
+      sendButton.hidden = true;
+      editButton.hidden = true;
+      document.querySelector("#review-title").focus({ preventScroll: true });
+    } catch {
+      status.textContent =
+        "We could not confirm your request. Please try again, or email it to " + recipientList + ".";
+      emailLink.hidden = false;
+    } finally {
+      submitting = false;
+      review.setAttribute("aria-busy", "false");
+      sendButton.disabled = false;
+      editButton.disabled = false;
+      sendButton.querySelector("span").textContent = "Send Request";
+    }
+  });
+  editButton.addEventListener("click", () => {
+    if (submitting || submitted) return;
     review.hidden = true;
     form.hidden = false;
     form.elements.name.focus();
@@ -106,20 +154,22 @@ if (form) {
     .addEventListener("click", async () => {
       try {
         await navigator.clipboard.writeText(summary.textContent);
-        status.textContent =
-          "Request copied. Email it to sales@agroexpress.farm.";
+        status.textContent = submitted
+          ? "Request copied."
+          : "Request copied. Email it to " + recipientList + ".";
       } catch {
         const range = document.createRange();
         range.selectNodeContents(summary);
         const selection = window.getSelection();
         selection.removeAllRanges();
         selection.addRange(range);
-        status.textContent =
-          "Select and copy the request above, then email sales@agroexpress.farm.";
+        status.textContent = submitted
+          ? "Select and copy the request above."
+          : "Select and copy the request above, then email " + recipientList + ".";
       }
     });
   emailLink.addEventListener("click", () => {
     status.textContent =
-      "Send the request in your email app. If it does not open, copy the request and email sales@agroexpress.farm.";
+      "Send the request in your email app to " + recipientList + ".";
   });
 }

@@ -12,9 +12,17 @@ Open index.html directly for a local preview. No server or runtime dependencies 
 
 ## Quote inquiries
 
-The quote form prepares a reviewable email addressed to sales@agroexpress.farm.
-The buyer must send it from their email application. Copy and edit actions are also available.
-It does not claim a message was sent or store submissions on a server.
+The quote form lets buyers review and submit directly through Netlify Forms.
+Verified submissions are stored in the Netlify project and trigger separate email
+notifications to craig@agroexpress.farm, sales@agroexpress.farm, and
+steven@agroexpress.farm. Each recipient must confirm Netlify's notification email
+before their notification becomes active. Spam-filtered submissions do not notify.
+The email fallback also addresses all three inboxes. Copy and edit actions remain available.
+The success state confirms form acceptance, not delivery into any recipient's inbox.
+The form has a honeypot, prevents duplicate clicks, and retains details on a failed request.
+Non-JavaScript submissions use Netlify's standard POST handling and success page.
+Review stored requests and notification settings in Netlify Forms; periodically
+remove business-contact data that is no longer needed.
 Craig and Steven retain direct phone and email links throughout the site.
 
 ## Design references

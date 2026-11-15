@@ -969,6 +969,13 @@ textarea {
   gap: 12px;
   flex-wrap: wrap;
 }
+#send-request {
+  min-width: 170px;
+}
+.review-actions button:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
 .text-button {
   border: 0;
   background: none;

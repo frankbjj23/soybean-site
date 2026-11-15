@@ -221,15 +221,19 @@
             <form
               class="quote-form"
               id="quote-form"
-              action="mailto:sales@agroexpress.farm"
+              name="quote-request"
               method="post"
-              enctype="text/plain"
+              data-netlify="true"
+              netlify-honeypot="website"
             >
+              <input type="hidden" name="form-name" value="quote-request" />
+              <p hidden>
+                <label>Website<input name="website" tabindex="-1" autocomplete="off" /></label>
+              </p>
               <div class="full form-heading">
                 <p class="eyebrow">Your requirements</p>
                 <h2>Request a quote</h2>
                 <p>
-                  Prepare your request, then send it through your email app.
                   Fields marked * are required.
                 </p>
               </div>
@@ -315,7 +319,7 @@
               </label>
               <div class="full form-actions">
                 <button class="button primary" type="submit">
-                  Review Request
+                  <span id="request-button-label">Send Request</span>
                   <img
                     class="icon"
                     src="assets/icons/arrow-up-right.svg"
@@ -326,18 +330,9 @@
                   />
                 </button>
                 <p>
-                  Your request goes to
-                  <a href="mailto:sales@agroexpress.farm"
-                    >sales@agroexpress.farm</a
-                  >.
+                  For Craig Lewis, Sales, and Steven Christian.
                 </p>
               </div>
-              <noscript
-                ><p class="full">
-                  This form opens your email application. You can also email our
-                  team directly with your requirements.
-                </p></noscript
-              >
             </form>
             <section
               class="quote-review"
@@ -345,19 +340,20 @@
               hidden
               aria-labelledby="review-title"
             >
-              <p class="eyebrow">Ready for your team</p>
+              <p class="eyebrow">Your quote request</p>
               <h2 id="review-title" tabindex="-1">Review your request</h2>
-              <p>
-                Check the details below, then open your email app to send your
-                inquiry.
-              </p>
               <pre id="quote-summary"></pre>
               <div class="review-actions">
+                <button class="button primary" id="send-request" type="button">
+                  <span>Send Request</span>
+                  <img class="icon" src="assets/icons/arrow-up-right.svg"
+                    width="20" height="20" alt="" aria-hidden="true" />
+                </button>
                 <a
-                  class="button primary"
+                  class="button secondary"
                   id="email-request"
-                  href="mailto:sales@agroexpress.farm"
-                  >Open Email
+                  href="mailto:craig@agroexpress.farm,sales@agroexpress.farm,steven@agroexpress.farm"
+                  >Email Instead
                   <img
                     class="icon"
                     src="assets/icons/mail.svg"

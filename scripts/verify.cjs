@@ -190,6 +190,7 @@ async function run() {
       .click();
     assert(page.url().endsWith("/corn.html"));
 
+    await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto(base + "/contact.html?product=corn#quote");
     assert.equal(await page.locator('[name="product"]').inputValue(), "corn");
     await page.getByRole("button", { name: "Review Request" }).click();
@@ -210,10 +211,23 @@ async function run() {
     const mail = new URL(
       await page.locator("#email-request").getAttribute("href"),
     );
-    assert.equal(mail.pathname, "sales@agroexpress.farm");
+    const recipients = [
+      "craig@agroexpress.farm",
+      "sales@agroexpress.farm",
+      "steven@agroexpress.farm",
+    ];
+    assert.deepEqual(mail.pathname.split(","), recipients);
     assert(mail.searchParams.get("body").includes("5000 metric tons"));
     assert(mail.searchParams.get("body").includes("GMO corn"));
     assert.equal(await page.locator("#quote-summary script").count(), 0);
+    assert.equal(await page.locator("#quote-form").getAttribute("data-netlify"), "true");
+    assert.equal(await page.locator('[name="form-name"]').inputValue(), "quote-request");
+    assert.equal(await page.locator('[name="website"]').isVisible(), false);
+    for (const width of [320, 390, 1440]) {
+      await page.setViewportSize({ width, height: 900 });
+      assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
+      await page.locator("#quote-review").screenshot({ path: path.join(output, "quote-review-" + width + ".png") });
+    }
     await page.evaluate(() =>
       Object.defineProperty(navigator, "clipboard", {
         value: {
@@ -225,6 +239,9 @@ async function run() {
       }),
     );
     await page.getByRole("button", { name: "Copy Request" }).click();
+    for (const recipient of recipients) {
+      assert((await page.locator("#quote-status").textContent()).includes(recipient));
+    }
     assert(
       (await page.evaluate(() => window.copiedRequest)).includes(
         "Sample Trading",
@@ -232,6 +249,49 @@ async function run() {
     );
     await page.getByRole("button", { name: "Edit details" }).click();
     assert.equal(await page.locator('[name="quantity"]').inputValue(), "5000");
+    await page.getByRole("button", { name: "Review Request" }).click();
+    let submissionCount = 0;
+    let finishSubmission;
+    let markSubmissionStarted;
+    const submissionStarted = new Promise((resolve) => { markSubmissionStarted = resolve; });
+    const submissionPending = new Promise((resolve) => { finishSubmission = resolve; });
+    await page.route(base + "/", async (route) => {
+      if (route.request().method() !== "POST") return route.continue();
+      submissionCount += 1;
+      const payload = new URLSearchParams(route.request().postData());
+      assert.equal(payload.get("form-name"), "quote-request");
+      assert.equal(payload.get("email"), "buyer@example.com");
+      assert.equal(payload.get("quantity"), "5000");
+      assert.equal(payload.get("product"), "corn");
+      assert.equal(payload.get("website"), "");
+      if (submissionCount === 1) return route.fulfill({ status: 503, body: "Unavailable" });
+      markSubmissionStarted();
+      await submissionPending;
+      return route.fulfill({ status: 200, body: "Accepted" });
+    });
+    await page.getByRole("button", { name: "Send Request", exact: true }).click();
+    await page.waitForFunction(() => document.querySelector("#quote-status").textContent.includes("could not confirm"));
+    assert.equal(await page.locator("#email-request").isVisible(), true);
+    assert.equal(await page.locator('[name="quantity"]').inputValue(), "5000");
+    await page.getByRole("button", { name: "Send Request", exact: true }).click();
+    await submissionStarted;
+    assert.equal(await page.locator("#send-request").isDisabled(), true);
+    assert.equal(await page.locator("#edit-request").isDisabled(), true);
+    await page.evaluate(() => document.querySelector("#send-request").click());
+    assert.equal(submissionCount, 2, "Duplicate click must not resubmit");
+    finishSubmission();
+    await page.getByRole("heading", { name: "Request received" }).waitFor();
+    assert.equal(await page.locator("#send-request").isVisible(), false);
+    assert.equal(await page.locator("#email-request").isVisible(), false);
+    await page.evaluate(() => document.querySelector("#send-request").click());
+    assert.equal(submissionCount, 2, "Accepted requests must not resubmit");
+    await page.unroute(base + "/");
+    const noScriptPage = await browser.newPage({ javaScriptEnabled: false });
+    await noScriptPage.goto(base + "/contact.html");
+    assert.equal(await noScriptPage.getByRole("button", { name: "Send Request" }).isVisible(), true);
+    assert.equal(await noScriptPage.locator("#quote-form").getAttribute("method"), "post");
+    assert.equal(await noScriptPage.locator('[name="form-name"]').inputValue(), "quote-request");
+    await noScriptPage.close();
 
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto(base + "/index.html");
@@ -258,7 +318,7 @@ async function run() {
     );
     assert.deepEqual(failures, [], "Browser JavaScript errors");
     console.log(
-      "Navigation, quote review/edit/copy, preselection, required fields, safe text rendering, reduced motion, links, schemas and 404 checks passed.",
+      "Navigation, quote review/edit/copy, three-recipient fallback, submission failure/retry/success, duplicate prevention, preselection, required fields, safe text rendering, reduced motion, links, schemas and 404 checks passed.",
     );
   } finally {
     await browser.close();
