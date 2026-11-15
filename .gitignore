@@ -1,0 +1,6 @@
+node_modules/
+dist/
+qa-output/
+.netlify/
+.env
+.env.*
