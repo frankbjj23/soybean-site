@@ -81,7 +81,7 @@ if (form) {
     const body = lines.join("\n");
     summary.textContent = body;
     emailLink.href =
-      "mailto:sales@agroexpressltda.com?subject=" +
+      "mailto:sales@agroexpress.farm?subject=" +
       encodeURIComponent("Quote request: " + product) +
       "&body=" +
       encodeURIComponent(body);
@@ -107,7 +107,7 @@ if (form) {
       try {
         await navigator.clipboard.writeText(summary.textContent);
         status.textContent =
-          "Request copied. Email it to sales@agroexpressltda.com.";
+          "Request copied. Email it to sales@agroexpress.farm.";
       } catch {
         const range = document.createRange();
         range.selectNodeContents(summary);
@@ -115,11 +115,11 @@ if (form) {
         selection.removeAllRanges();
         selection.addRange(range);
         status.textContent =
-          "Select and copy the request above, then email sales@agroexpressltda.com.";
+          "Select and copy the request above, then email sales@agroexpress.farm.";
       }
     });
   emailLink.addEventListener("click", () => {
     status.textContent =
-      "Send the request in your email app. If it does not open, copy the request and email sales@agroexpressltda.com.";
+      "Send the request in your email app. If it does not open, copy the request and email sales@agroexpress.farm.";
   });
 }

@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://www.agroexpressltda.com/sitemap.xml
+Sitemap: https://agroexpress.farm/sitemap.xml

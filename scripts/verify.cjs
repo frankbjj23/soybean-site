@@ -210,7 +210,7 @@ async function run() {
     const mail = new URL(
       await page.locator("#email-request").getAttribute("href"),
     );
-    assert.equal(mail.pathname, "sales@agroexpressltda.com");
+    assert.equal(mail.pathname, "sales@agroexpress.farm");
     assert(mail.searchParams.get("body").includes("5000 metric tons"));
     assert(mail.searchParams.get("body").includes("GMO corn"));
     assert.equal(await page.locator("#quote-summary script").count(), 0);
