@@ -1,6 +1,7 @@
 # Asset provenance
 
-Original logo, Raleway fonts, curved arrow, and legacy images were provided by the original AgroExpress site and retained from the existing repository.
+The logo, Raleway fonts, curved arrow, and legacy images were provided by the original AgroExpress site and retained from the existing repository.
+On November 16, 2026, the logo's company suffix was removed by a precise transparent-pixel edit approved by the owner. All remaining original artwork is unchanged; AI-generated alternatives were not used.
 agroexpress-logo-small.webp and soybean-field.webp are optimized versions of existing assets.
 
 Generated November 15, 2026 using OpenAI image generation:

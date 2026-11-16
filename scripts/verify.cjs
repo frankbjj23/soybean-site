@@ -49,6 +49,13 @@ const server = http.createServer((req, res) => {
 });
 
 async function run() {
+  for (const file of [...pages, "about/index.html", "contact/index.html"]) {
+    assert.doesNotMatch(
+      fs.readFileSync(path.join(root, file), "utf8"),
+      /\bltda\b/i,
+      file + ": obsolete company suffix in copy or metadata",
+    );
+  }
   await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
   const base = "http://127.0.0.1:" + server.address().port;
   const browser = await chromium.launch({

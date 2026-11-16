@@ -1,4 +1,4 @@
-# AgroExpress Ltda.
+# AgroExpress
 
 Static, responsive website for Brazilian soybean and corn export inquiries.
 Open index.html directly for a local preview. No server or runtime dependencies are required.
